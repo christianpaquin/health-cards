@@ -1182,7 +1182,7 @@ Issuer -&gt;&gt; Holder: Holder receives Health Card</div>
 </ul>
 </li>
 </ul>
-<p>When representing a Health Card in a QR code, we aim to ensure that printed (or electronically displayed) codes are usable at physical dimensions of 40mmx40mm. This constraint allows us to use QR codes up to Version 22, at 105x105 modules. Therefore, Issuers SHOULD ensure that the total string length of any Health Card <strong>JWS is &lt;= 1197 characters</strong>. If it is not possible to fit the full <code>fhirBundle</code> in a JWS of 1197 characters, Issuers SHOULD use the following technique to split a Health Card into a Health Card Set:</p>
+<p>When representing a Health Card in a QR code, we aim to ensure that printed (or electronically displayed) codes are usable at physical dimensions of 40mmx40mm. This constraint allows us to use QR codes up to Version 22, at 105x105 modules. Therefore, Issuers SHOULD ensure that the total string length of any Health Card <strong>JWS is &lt;= 1195 characters</strong>. If it is not possible to fit the full <code>fhirBundle</code> in a JWS of 1195 characters, Issuers SHOULD use the following technique to split a Health Card into a Health Card Set:</p>
 <ul>
 <li>Generate a random "Health Card Set" uuid</li>
 <li>Partition the <code>fhirBundle.entry</code> resources into N groups</li>
@@ -1291,25 +1291,29 @@ Issuer -&gt;&gt; Holder: Holder receives Health Card</div>
 <p>When printing or displaying a Health Card as a QR code, the the JWS string value SHALL be represented as two segments:</p>
 <ol>
 <li>
-<p>A segment encoded with <code>bytes</code> mode consisting of the fixed string <code>shc:</code></p>
+<p>A segment encoded with <code>bytes</code> mode consisting of the fixed string <code>shc:/</code></p>
 </li>
 <li>
 <p>A segment encoded with <code>numeric</code> mode consisting of the characters <code>0</code>-<code>9</code>. Each character "c" of the JWS is converted into a sequence of two digits as by taking <code>Ord(c)-45</code> and treating the result as a two-digit base ten number. For example, <code>'X'</code> is encoded as <code>43</code>, since <code>Ord('X')</code> is <code>88</code>, and <code>88-45</code> is <code>43</code>. (The constant "45" appears here because it is the ordinal value of <code>-</code>, the lowest-valued character that can appear in a compact JWS. Subtracting 45 from the ordinal values of valid JWS characters produces a range between 00 and 99, ensuring that each character of the JWS can be represented in exactly two base-10 numeric digits.)</p>
 </li>
 </ol>
 <p>(The reason for representing Health Cards using Numeric Mode QRs instead of Binary Mode (Latin-1) QRs is information density: with Numeric Mode, 20% more data can fit in a given QR, vs Binary Mode. This is because the JWS character set conveys only log_2(65) bits per character (~6 bits); binary encoding requires log_2(256) bits per character (8 bits), which means ~2 wasted bits per character.)</p>
-<p>When reading a QR code, scanning software can recognize a SMART Health Card from the <code>shc:</code> prefix. Stripping this six-character prefix and decoding the remaining pairs of numerals yields a JWS.</p>
+<p>When reading a QR code, scanning software can recognize a SMART Health Card from the <code>shc:/</code> prefix. Stripping this six-character prefix and decoding the remaining pairs of numerals yields a JWS.</p>
 <hr />
 <h2 id="faq">FAQ<a class="headerlink" href="#faq" title="Permanent link">&para;</a></h2>
 <h3 id="which-clinical-data-should-be-considered-in-decision-making">Which clinical data should be considered in decision-making?<a class="headerlink" href="#which-clinical-data-should-be-considered-in-decision-making" title="Permanent link">&para;</a></h3>
 <ul>
 <li>The data in Health Cards should focus on communicating "immutable clinical facts".</li>
-<li>Each use case will define specific data profiles.</li>
+<li>Each use case will define specific data profiles.<ul>
 <li>For COVID-19 Vaccination Credentials, the <a href="http://build.fhir.org/ig/dvci/vaccine-credential-ig/branches/main">SMART Health Cards: Vaccination IG</a> defines requirements.</li>
-<li>When Health Cards are used in decision-making, the verifier is responsible for deciding what rules to apply. For example:</li>
+</ul>
+</li>
+<li>When Health Cards are used in decision-making, the verifier is responsible for deciding what rules to apply. For example:<ul>
 <li>decision-making rules may change over time as our understanding of the clinical science improves.</li>
 <li>decision-making rules may be determined or influenced by international, national and local health authorities.</li>
 <li>decision-making rules may require many inputs, some of which can be supplied by Health Cards and others of which may come from elsewhere (e.g., by asking the user "are you experiencing any symptoms today?").</li>
+</ul>
+</li>
 </ul>
 <h3 id="how-can-we-share-conclusions-like-a-safe-to-fly-pass-instead-of-sharing-clinical-results">How can we share conclusions like a "Safe-to-fly Pass", instead of sharing clinical results?<a class="headerlink" href="#how-can-we-share-conclusions-like-a-safe-to-fly-pass-instead-of-sharing-clinical-results" title="Permanent link">&para;</a></h3>
 <p>Decision-making often results in a narrowly-scoped "Pass" that embodies conclusions like "Person X qualifies for international flight between Country A and Country B, according to Rule Set C". While Health Cards are designed to be long-lived and general-purpose, Passes are highly contextual. We are not attempting to standardize "Passes" in this framework, but Health Cards can provide an important verifiable input for the generation of Passes.</p>
